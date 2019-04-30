@@ -1,55 +1,105 @@
-import random
-from random import randint
+"""This is a code for the hangman game"""
+from os import system, name
+from time import sleep
+from random import *
 
-def Get_Word():
-    # world_list[0]
-    word_list = ("encyclopedia", "hello world", "spam", "eggs", "Guido", "Rossum", "foux pax")
-    #random number
-    choice = random.randint(0, len(word_list))
-    #get the word
-    word = word_list[choice - 1]
-    return word, word_list
 
-def Blank_Word(word):
-    blank_word = ""
-    for char in range(len(word)):
-        if word[char].isalpha():
-            blank_word += "-"
-        else:
-            blank_word += word[char]
-    return blank_word
+def clear():
+    """ Function to clear the Console """
+    if name == 'nt':
+        _ = system('cls')
+    else:
+        _ = system('clear')
 
-def Game_Time(word, blank_word):
-    tries = 6
-    while True:
-        input_char = input("Enter a Letter: ")
-        word = list(word)
-        blank_word = list(blank_word)
 
-        for char in range(len(blank_word)):
-            if input_char == word[char]:
-                blank_word[char] = input_char
-                break
-            elif word[char] == " ":
+class Hangman:
+    def __init__(self, word):
+        self.word = word
+        self.tries = len(word) + 1  # easy word has less tries than a big ones
+        self.blank = ["- " for i in word]
+    
+
+    def SetField(self):
+        clear()
+        print(f"Tries Left: {self.tries}")
+        print(f"Word: {''.join(self.blank)}\n")
+
+    def GetInput(self):
+        while True:
+            print("Please enter your choice")
+            choice = input(">>> ")
+
+            if len(choice) == 0:
+                print("String can't be zero\n\n")
                 continue
-            elif tries == 0:
-                            print(f"""Aw Shucks! Your tries are up!
-The Correct word was: {"".join(word)}
-
-Better luck next time!""")
-                            break
             else:
-                tries -= 1
-                print(f"{tries} left")
                 break
 
-        print("".join(blank_word))
+        correct = False
 
-        if blank_word == word:
-            print("Congratulations!!!")
-            input("Press Any Key to continue...")
-            return
+        for i in range(len(self.word)):
+            if self.word[i] in choice:
+                self.blank[i] = self.word[i]+" "
+                correct = True
+
+        if correct is False:
+            self.tries -= 1
+
+class Library:
+    """ Library for all our Words """
+    
+    @staticmethod
+    def GetWord(category):
+        easy = [
+            "dog", "cat", "spam", "rat", "python", "book",
+            "snake", "fire", "computer", "browser", "fire"
+        ]
+
+        medium = [
+                "firehose", "integrated", "intense", "console",
+                "country", 'municipality', "antenna", "thorax"
+        ]
+
+        hard = [
+                "encyclopedia", "administrator", "conciousness",
+                "interesting", "complication"
+        ]
+
+        insane = [
+                "antidisestablishmentarianism", "floccinaucinihilipilification",
+                "pneumonoultramicroscopicsilicovolcanoconiosis"
+        ]
+        
+        if category == "e":
+            return easy[randint(0, len(easy)-1)]
+        elif category == "m":
+            return medium[randint(0, len(medium)-1)]
+        elif category == "h":
+            return hard[randint(0, len(hard)-1)]
+        elif category == "insane":
+            return insane[randint(0, len(insane)-1)]
+        else:
+            raise Exception("This category does not exist")
+
+
+
+if __name__ == "__main__":
+    # create class objects
+    hangman = Hangman(Library.GetWord(input("Which category? (e, m, h, insane)\n: ")))
+    
+    # main game Loop
+    while True:
+        if  (''.join(hangman.blank)).replace(" ", '') == hangman.word:
+            print("Congratulations!!! You Won")
+            break
+        elif hangman.tries == 0:
+            print("Oof! Looks like you lost :(")
+            break        
+        else:
+            hangman.SetField()
+            hangman.GetInput()
+
+    print("END OF GAME")
+    input("Press Enter to quit...")
             
-word = Get_Word()
-blank_word = Blank_Word(word[0])
-Game_Time(word[0], blank_word)
+        
